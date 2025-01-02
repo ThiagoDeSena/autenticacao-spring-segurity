@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public record ResetDTO(
         @NotBlank String email,
-        @NotBlank @Size(min = 8,message = "A senha deve ter pelo menos 8 caracteres") String codigo,
-        @NotBlank String senha,
+        @NotBlank String codigo,
+        @NotBlank @Size(min = 8,message = "A senha deve ter pelo menos 8 caracteres") String senha,
         @NotBlank String confirmacaoSenha) {
 }

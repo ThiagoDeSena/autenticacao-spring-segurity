@@ -3,10 +3,9 @@ package br.com.projeto.service;
 import br.com.projeto.models.Pessoa;
 import br.com.projeto.models.Teste;
 import br.com.projeto.models.email.EmailDTO;
-import br.com.projeto.models.usuario.IUsuarioRepository;
-import br.com.projeto.models.usuario.RegisterDTO;
-import br.com.projeto.models.usuario.ResetDTO;
-import br.com.projeto.models.usuario.Usuario;
+import br.com.projeto.models.usuario.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,8 @@ public class UsuarioGerenciamentoService {
         return format.format(new Date())+id;
     }
 
-    public String alterarSenha(ResetDTO usuario){
+    public AlterarSenhaResponse alterarSenha(ResetDTO usuario){
+        // Busca o email e o código de altentificação de senha do usuário
         Usuario usuarioBanco = usuarioRepository.findByLoginAndCodigoRecuperacaoSenha(usuario.email(),usuario.codigo());
 
         if (usuarioBanco!=null){
@@ -54,14 +54,19 @@ public class UsuarioGerenciamentoService {
                 usuarioBanco.setSenha(novaSenhaCriptografada);
                 usuarioBanco.setCodigoRecuperacaoSenha(null);
                 usuarioRepository.saveAndFlush(usuarioBanco);
-                return "Senha Alterada com Sucesso!";
+//                return "Senha Alterada com Sucesso!";
+                return new AlterarSenhaResponse(true,"Senha Alterada com Sucesso");
             }else {
-                return "Tempo expirado, solicite um novo código!";
+//                return "Tempo expirado, solicite um novo código!";
+                return new AlterarSenhaResponse(false,"Tempo expirado, solicite um novo código!");
             }
 
         }else {
-            return "Email ou Código não encontrados!";
+//            return "Email ou Código não encontrados!";
+            return new AlterarSenhaResponse(false,"Código não encontrados!");
         }
 
     }
 }
+
+

@@ -8,6 +8,7 @@ import br.com.projeto.service.EmailService;
 import br.com.projeto.service.UsuarioGerenciamentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,6 +64,7 @@ public class AuthenticationController {
         return ResponseEntity.ok().body("Usuário registrado com sucesso!");
     }
 
+    //Envia código de recuperação de senha para o Usuário pelo email
     @PostMapping("/recover")
     public ResponseEntity CodigoRecuperacaoSenha(@RequestParam("login") String email){
         if (this.usuarioRepository.buscarPorLogin(email) == null){
@@ -74,13 +76,22 @@ public class AuthenticationController {
 
     }
 
+    //Redefinição de senha com o código enviado por email do /recover para o usuário
     @PostMapping("/reset")
     public ResponseEntity reset(@RequestBody ResetDTO resetDTO){
-        if (this.usuarioRepository.buscarPorLogin(resetDTO.email()) == null && resetDTO.senha().equals(resetDTO.confirmacaoSenha())){
+        if (this.usuarioRepository.buscarPorLogin(resetDTO.email()) == null){
             return ResponseEntity.badRequest().body("Usuário não cadastrado!");
         }
+        if(!resetDTO.senha().equals(resetDTO.confirmacaoSenha())){
+            return ResponseEntity.badRequest().body("As senhas não conicidem!");
+        }
+        if(resetDTO.senha().length()<8){
+            return ResponseEntity.badRequest().body("A senha deve ter pelo menos 8 caracteres");
+        }
 
-        return ResponseEntity.ok().body(usuarioGerenciamentoService.alterarSenha(resetDTO));
+//        return ResponseEntity.ok().body(usuarioGerenciamentoService.alterarSenha(resetDTO));
+        AlterarSenhaResponse reponse = usuarioGerenciamentoService.alterarSenha(resetDTO);
+        return ResponseEntity.status(reponse.isSucesso() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(reponse);
     }
 
     @GetMapping("")
